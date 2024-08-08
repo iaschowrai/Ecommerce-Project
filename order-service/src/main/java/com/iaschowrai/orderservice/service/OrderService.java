@@ -21,33 +21,19 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-
     // Method to place an order based on the provided OrderRequest
     public void placeOrder(OrderRequest orderRequest){
-        // Create a new Order instance
+       // map OrderRequest to Order object
         Order order = new Order();
-        // Generate a unique order number using UUID
         order.setOrderNumber(UUID.randomUUID().toString());
+        order.setPrice(orderRequest.price());
+        order.setSkuCode(orderRequest.skuCode());
+        order.setQuantity(orderRequest.quantity());
 
-        // Map OrderLineItemsDto objects from OrderRequest to OrderLineItems entities
-        List<OrderLineItems> orderLineItems = orderRequest.getOrderLineItemsDtoList()
-                .stream()
-                .map(orderLineItemsDto -> mapToDto(orderLineItemsDto))
-                .toList();
-
-        order.setOrderLineItemsList(orderLineItems);
-
-        // Save the order to the repository
+        // save order to OrderRepository
         orderRepository.save(order);
     }
 
-    // Private method to map OrderLineItemsDto to OrderLineItems entity
-    private OrderLineItems mapToDto(OrderLineItemsDto orderLineItemsDto) {
-        OrderLineItems orderLineItems = new OrderLineItems();
-        orderLineItems.setPrice(orderLineItemsDto.getPrice());
-        orderLineItems.setQuantity(orderLineItemsDto.getQuantity());
-        orderLineItems.setSkuCode(orderLineItemsDto.getSkuCode());
-        return orderLineItems;
-    }
+
 
 }

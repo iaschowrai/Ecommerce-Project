@@ -3,20 +3,9 @@ package com.iaschowrai.orderservice.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class OrderRequest {
-    private List<OrderLineItemsDto> orderLineItemsDtoList;
 
-    public List<OrderLineItemsDto> getOrderLineItemsDtoList() {
-        return orderLineItemsDtoList;
-    }
-
-    public void setOrderLineItemsDtoList(List<OrderLineItemsDto> orderLineItemsDtoList) {
-        this.orderLineItemsDtoList = orderLineItemsDtoList;
-    }
+public record OrderRequest(Long id, String orderNumber, String skuCode, BigDecimal price, Integer quantity) {
 }
