@@ -8,15 +8,7 @@ import org.springframework.data.annotation.Id;
 
 import java.math.BigDecimal;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 
-public class ProductResponse {
 
-    private String id;
-    private String name;
-    private String description;
-    private BigDecimal price;
+public record ProductResponse (String id,  String name, String description, BigDecimal price){
 }

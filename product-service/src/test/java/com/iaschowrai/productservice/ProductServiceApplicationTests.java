@@ -1,80 +1,55 @@
 package com.iaschowrai.productservice;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iaschowrai.productservice.dto.ProductRequest;
-import com.iaschowrai.productservice.repository.ProductRepository;
-import org.junit.jupiter.api.Assertions;
+import io.restassured.RestAssured;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import static io.restassured.RestAssured.given;
 
-import java.math.BigDecimal;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @AutoConfigureMockMvc
-class ProductServiceApplicationTests {
+public class ProductServiceApplicationTests {
 
-	/*You are using TestContainers to spin up a MongoDB container for integration testing.
-	The @Container annotation marks a static field as a container that should be started before any test methods are executed.*/
-	@Container
-	static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongodb:4.4.2");
+	@LocalServerPort
+	private Integer port;
 
-//	You are using MockMvc to perform HTTP requests and validate the responses.
-	@Autowired
-	private MockMvc mockMvc;
+	static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.5");
 
-//	The ObjectMapper is used for converting objects to JSON strings.
-	@Autowired
-	private ObjectMapper objectMapper;
-
-
-
-//	ProductRepository: Autowired to interact with the MongoDB database.
-	@Autowired
-	private ProductRepository productRepository;
-
-
-	/*The @DynamicPropertySource annotation is used to dynamically set properties for your Spring application.
-	In this case, it sets the MongoDB connection URI dynamically based on the running MongoDB container.*/
-	@DynamicPropertySource
-	static void setProperties(DynamicPropertyRegistry dynamicPropertyRegistry){
-		dynamicPropertyRegistry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-
+	static {
+		mongoDBContainer.start();
 	}
 
-	/*The actual test method where you create a ProductRequest, convert it to a JSON string,
-	and perform a POST request to your /api/product endpoint. It then asserts that the HTTP response status is "Created"
-	 and checks if one product is present in the MongoDB database.*/
+	@BeforeEach
+	void setup() {
+		RestAssured.baseURI = "http://localhost";
+		RestAssured.port = port;
+	}
+
 	@Test
 	void shouldCreateProduct() throws Exception {
+		String requestBody = """
+            {
+                "name": "iphone15",
+                "description": "iphone 15 is new mobile phone",
+                "price": 1000
+            }""";
 
-		ProductRequest productRequest =  getProductRequest();
-		String productRequestString = objectMapper.writeValueAsString(productRequest);
-		mockMvc.perform(MockMvcRequestBuilders.post("/api/product")
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(productRequestString))
-				.andExpect(status().isCreated());
-		Assertions.assertEquals(1, productRepository.findAll().size());
+		given()
+				.contentType("application/json")
+				.body(requestBody)
+				.when()
+				.post("/api/product/add")
+				.then()
+				.statusCode(201)
+				.body("id", Matchers.notNullValue())
+				.body("name", Matchers.equalTo("iphone15"))
+				.body("description", Matchers.equalTo("iphone 15 is new mobile phone"))
+				.body("price", Matchers.equalTo(1000));
 	}
-
-	private ProductRequest getProductRequest(){
-		return ProductRequest.builder()
-				.name("iphone 13")
-				.description("apple")
-				.price(BigDecimal.valueOf(1200))
-				.build();
-	}
-
 }
