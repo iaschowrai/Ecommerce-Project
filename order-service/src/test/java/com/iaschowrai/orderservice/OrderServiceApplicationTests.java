@@ -21,7 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 class OrderServiceApplicationTests {
 	@Container
 	@ServiceConnection
-	static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8.0.0"));
+	static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8.0.33"));
 
 	@LocalServerPort
 	private Integer port;
