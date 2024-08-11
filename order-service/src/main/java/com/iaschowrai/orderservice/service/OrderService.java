@@ -1,6 +1,6 @@
 package com.iaschowrai.orderservice.service;
 
-import com.iaschowrai.orderservice.client.InventoryClient;
+import com.iaschowrai.orderservice.webclient.InventoryClient;
 import com.iaschowrai.orderservice.dto.OrderRequest;
 import com.iaschowrai.orderservice.exception.ProductNotInStockException;
 import com.iaschowrai.orderservice.model.Order;
